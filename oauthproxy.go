@@ -587,8 +587,14 @@ func (p *OAuthProxy) SignIn(rw http.ResponseWriter, req *http.Request) {
 
 // SignOut sends a response to clear the authentication cookie
 func (p *OAuthProxy) SignOut(rw http.ResponseWriter, req *http.Request) {
+	redirect, err := p.GetRedirect(req)
+	if err != nil {
+		p.ErrorPage(rw, 500, "Internal Error", err.Error())
+		return
+	}
+	logger.Printf("Redirect to %s", redirect)
 	p.ClearSessionCookie(rw, req)
-	http.Redirect(rw, req, "/", 302)
+	http.Redirect(rw, req, redirect, 302)
 }
 
 // OAuthStart starts the OAuth2 authentication flow
